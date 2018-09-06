@@ -20,11 +20,16 @@ RZBluetooth is a Core Bluetooth helper with 3 primary goals:
   s.source       = { :git => "https://github.com/Raizlabs/RZBluetooth.git", :tag => s.version }
   s.requires_arc = true
 
-  s.dependency "RZBluetooth/Mock"
   s.frameworks = "XCTest"
-  s.source_files = "RZBluetoothTests/RZBTestDefines.h",
+  s.source_files = "RZBluetooth/**/*.{h,m}",
+                        "RZMockBluetooth/**/*.{h,m}",
+                        "RZBluetoothTests/RZBTestDefines.h",
                         "RZBluetoothTests/RZBSimulatedTestCase.{h,m}",
                         "RZBluetoothTests/Helpers/NSRunLoop+RZBWaitFor.{h,m}"
-  s.public_header_files = "RZBluetoothTests/RZBSimulatedTestCase.h", "RZBluetoothTests/RZBTestDefines.h"
+  s.public_header_files = "RZBluetooth/**/*.h",
+                            "RZMockBluetooth/**/*.h",
+                            "RZBluetoothTests/RZBSimulatedTestCase.h",
+                            "RZBluetoothTests/RZBTestDefines.h"
+  s.private_header_files = "RZBluetooth/**/*+Private.h", "RZBluetooth/Command/*.h", "RZBluetooth/RZBCentralManager+CommandHelper.h", "RZMockBluetooth/**/*+Private.h"
 
 end
