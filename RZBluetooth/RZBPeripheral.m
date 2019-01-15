@@ -7,6 +7,7 @@
 //
 
 #import "RZBPeripheral+Private.h"
+#import "RZBErrors.h"
 
 @implementation RZBPeripheral
 
@@ -43,7 +44,23 @@
         self.notifyBlockByUUIDs[key] = [notifyBlock copy];
     }
     else {
-        [self.notifyBlockByUUIDs removeObjectForKey:key];
+        [self clearNotifyBlockForKey:key];
+    }
+}
+
+- (void) clearNotifyBlockForKey:(NSString*) key {
+    RZBCharacteristicBlock block = self.notifyBlockByUUIDs[key];
+    [self.notifyBlockByUUIDs removeObjectForKey:key];
+    if (block && self.notifyUnsubscription) {
+        block(nil, [NSError errorWithDomain:RZBluetoothErrorDomain
+                                       code:RZBluetoothNotifyUnsubscribed
+                                   userInfo:nil]);
+    }
+}
+
+- (void)clearNotifyBlocks {
+    for (NSString* key in self.notifyBlockByUUIDs) {
+        [self clearNotifyBlockForKey:key];
     }
 }
 
@@ -89,6 +106,7 @@
 {
     completion = completion ?: ^(NSError *error) {};
     self.maintainConnection = NO;
+    [self cancelAllCommands];
     if (self.corePeripheral.state == CBPeripheralStateDisconnected) {
         dispatch_async(self.dispatch.queue, ^() {
             completion(nil);
@@ -102,6 +120,18 @@
             completion(error);
         }];
         [self.dispatch dispatchCommand:cmd];
+    }
+}
+
+- (void)cancelAllCommands
+{
+    NSError *error = [NSError errorWithDomain:RZBluetoothErrorDomain
+                                         code:RZBluetoothConnectionCancelled
+                                     userInfo:@{}];
+
+    for (RZBCommand *command in [self.dispatch commands]) {
+        [self.dispatch completeCommand:command
+                            withObject:nil error:error];
     }
 }
 
@@ -166,12 +196,23 @@
     // If anything here is nil, there is no completion block, which is fine.
     [self setNotifyBlock:nil forCharacteristicUUID:characteristicUUID serviceUUID:serviceUUID];
 
-    RZBNotifyCharacteristicCommand *cmd = [[RZBNotifyCharacteristicCommand alloc] initWithUUIDPath:path];
-    cmd.notify = NO;
-    [cmd addCallbackBlock:^(CBCharacteristic *c, NSError *error) {
-        completion(c, error);
-    }];
-    [self.dispatch dispatchCommand:cmd];
+    // Disable the notify characteristic on the peripheral if the peripheral is
+    // connected. If not connected, trigger completion.
+    if (self.corePeripheral.state == CBPeripheralStateConnected) {
+        RZBNotifyCharacteristicCommand *cmd = [[RZBNotifyCharacteristicCommand alloc] initWithUUIDPath:path];
+        cmd.notify = NO;
+        [cmd addCallbackBlock:^(CBCharacteristic *c, NSError *error) {
+            completion(c, error);
+        }];
+        [self.dispatch dispatchCommand:cmd];
+    }
+    else {
+        dispatch_async(self.dispatch.queue, ^() {
+            CBService *service = [self.corePeripheral rzb_serviceForUUID:serviceUUID];
+            CBCharacteristic *characteristic = [service rzb_characteristicForUUID:characteristicUUID];
+            completion(characteristic, nil);
+        });
+    }
 }
 
 - (void)writeData:(NSData *)data
@@ -233,6 +274,16 @@ characteristicUUID:(CBUUID *)characteristicUUID
     [self.connectionDelegate peripheral:self connectionEvent:event error:error];
 
     if (event != RZBPeripheralStateEventConnectSuccess && self.maintainConnection) {
+        [self connectWithCompletion:nil];
+    }
+    
+    if (self.connectionEventHandler) {
+        self.connectionEventHandler(event, error);
+    }
+}
+
+-(void)attemptReconnectionForEvent:(RZBPeripheralStateEvent)event {
+    if (event != RZBPeripheralStateEventConnectSuccess && event != RZBPeripheralStateEventUserCancelled) {
         [self connectWithCompletion:nil];
     }
 }
