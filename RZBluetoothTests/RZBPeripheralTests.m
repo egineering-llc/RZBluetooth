@@ -31,4 +31,14 @@
     XCTAssertNoThrow([peripheral clearNotifyBlocks]);
 }
 
+- (void)testCancelConnectionInConnectCompletion {
+    RZBPeripheral *peripheral = [self.centralManager peripheralForUUID:self.connection.identifier];
+
+    [peripheral connectWithCompletion:^(NSError * _Nullable error) {
+        [peripheral cancelConnectionWithCompletion:nil];
+    }];
+    
+    [self waitForQueueFlush];
+}
+
 @end
