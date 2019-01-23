@@ -129,8 +129,17 @@
     NSError *error = [NSError errorWithDomain:RZBluetoothErrorDomain
                                          code:RZBluetoothConnectionCancelled
                                      userInfo:@{}];
-
-    for (RZBCommand *command in [self.dispatch commands]) {
+    
+    NSArray *commands;
+    @synchronized(self.dispatch.commands) {
+        commands = [self.dispatch.commands copy];
+    }
+    for (RZBCommand *command in commands) {
+        if (command.isExecuted == YES && command.isCompleted == NO) {
+            // We are in the completion handler of this command. Do not complete it or we will loop infinitely.
+            continue;
+        }
+        
         [self.dispatch completeCommand:command
                             withObject:nil error:error];
     }
