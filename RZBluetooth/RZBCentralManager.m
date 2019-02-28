@@ -18,6 +18,7 @@
 #import "RZBPeripheralStateEvent.h"
 #import <TargetConditionals.h>
 #import <objc/runtime.h>
+#import "RZBUserInteraction.h"
 
 @implementation RZBCentralManager
 
@@ -96,6 +97,15 @@
                                options:(NSDictionary *)options
                 onDiscoveredPeripheral:(RZBScanBlock)scanBlock
 {
+    NSTimeInterval timeout = [RZBUserInteraction timeout];
+    [self scanForPeripheralsWithServices:serviceUUIDs options:options timeout:timeout onDiscoveredPeripheral:scanBlock];
+}
+
+- (void)scanForPeripheralsWithServices:(NSArray *)serviceUUIDs
+                               options:(NSDictionary *)options
+                               timeout:(NSTimeInterval)timeout
+                onDiscoveredPeripheral:(RZBScanBlock)scanBlock
+{
     NSParameterAssert(scanBlock);
     self.activeScanBlock = scanBlock;
     [self completeScanCommand];
@@ -110,7 +120,7 @@
         }
     }];
 
-    [self.dispatch dispatchCommand:cmd];
+    [self.dispatch dispatchCommand:cmd timeout:timeout];
 }
 
 - (void)stopScan

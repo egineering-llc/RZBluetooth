@@ -95,6 +95,19 @@ NS_ASSUME_NONNULL_BEGIN
                 onDiscoveredPeripheral:(RZBScanBlock)scanBlock;
 
 /**
+ * Scan for peripherals with the specified UUIDs, options, and timeout. Trigger the scanBlock
+ * for every discovered peripheral. Multiple calls to this method will replace the previous
+ * calls.
+ *
+ * The onError: block will be triggered if there are any CBManagerState errors and
+ * for user interaction timeout errors if configured.
+ */
+- (void)scanForPeripheralsWithServices:(NSArray<CBUUID *> * __nullable)serviceUUIDs
+                               options:(NSDictionary<NSString *, id> * __nullable)options
+                               timeout:(NSTimeInterval)timeout
+                onDiscoveredPeripheral:(RZBScanBlock)scanBlock;
+
+/**
  * Stop the peripheral scan.
  */
 - (void)stopScan;
