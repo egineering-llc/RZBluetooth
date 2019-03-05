@@ -13,6 +13,7 @@
 #import "XCTestCase+Helpers.h"
 #import "NSRunLoop+RZBWaitFor.h"
 #import "CBUUID+TestUUIDs.h"
+#import "RZBUserInteraction.h"
 
 @interface RZBCommandDispatchTests : XCTestCase
 
@@ -159,6 +160,25 @@
         return self.dispatch.commands.count == 0;
     }];
     XCTAssert(done);
+}
+
+-(void)testDefaultTimeout
+{
+    self.dispatch = [[RZBCommandDispatch alloc] initWithQueue:nil context:self];
+    RZBCTestCommand *cCmd = [[RZBCTestCommand alloc] initWithUUIDPath:RZBUUIDPath.cUUIDPath];
+    [RZBUserInteraction setEnabled:YES];
+    [self.dispatch dispatchCommand:cCmd];
+    XCTAssertEqualWithAccuracy(cCmd.expiresAt, [[NSDate date] timeIntervalSinceReferenceDate] + [RZBUserInteraction timeout], 0.0001);
+}
+
+-(void)testCustomTimeout
+{
+    NSTimeInterval timeout = 10;
+    self.dispatch = [[RZBCommandDispatch alloc] initWithQueue:nil context:self];
+    RZBCTestCommand *cCmd = [[RZBCTestCommand alloc] initWithUUIDPath:RZBUUIDPath.cUUIDPath];
+    [RZBUserInteraction setEnabled:YES];
+    [self.dispatch dispatchCommand:cCmd timeout:timeout];
+    XCTAssertEqualWithAccuracy(cCmd.expiresAt, [[NSDate date] timeIntervalSinceReferenceDate] + timeout, 0.0001);
 }
 
 @end
