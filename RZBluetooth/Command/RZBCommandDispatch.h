@@ -92,7 +92,7 @@
 /**
  * Submit a new command with custom timeout.
  */
-- (void)dispatchCommand:(RZBCommand *)command timeout:(NSTimeInterval) timeout;
+- (void)dispatchCommand:(RZBCommand *)command timeout:(NSTimeInterval)timeout;
 
 /**
  * Attempt to dispatch any un-executed commands
