@@ -43,7 +43,7 @@
     [self dispatchCommand:command timeout:timeout];
 }
 
-- (void)dispatchCommand:(RZBCommand *)command timeout:(NSTimeInterval) timeout
+- (void)dispatchCommand:(RZBCommand *)command timeout:(NSTimeInterval)timeout
 {
     NSParameterAssert(command);
     @synchronized(self.commands) {
