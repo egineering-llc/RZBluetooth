@@ -134,6 +134,19 @@ characteristicUUID:(CBUUID *)characteristicUUID
        completion:(RZBCharacteristicBlock)completion;
 
 /**
+ * Write the data to a specific characteristic and wait for a response from the
+ * device. This is the same as the above command with a timeout.
+ *
+ * @note The completion block requires a notification from the device and may also
+ *       impact throughput. It shouldn't be used unless required.
+ */
+- (void)writeData:(NSData *)data
+characteristicUUID:(CBUUID *)characteristicUUID
+      serviceUUID:(CBUUID *)serviceUUID
+          timeout:(NSTimeInterval)timeout
+       completion:(RZBCharacteristicBlock)completion;
+
+/**
  * Discover the services specified and trigger the completion block.
  *
  * @param serviceUUIDs array of services to discover. Pass nil to discover all services.

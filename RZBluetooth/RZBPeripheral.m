@@ -7,6 +7,7 @@
 //
 
 #import "RZBPeripheral+Private.h"
+#import "RZBUserInteraction.h"
 
 @implementation RZBPeripheral
 
@@ -190,13 +191,23 @@ characteristicUUID:(CBUUID *)characteristicUUID
       serviceUUID:(CBUUID *)serviceUUID
        completion:(RZBCharacteristicBlock)completion
 {
+    NSTimeInterval timeout = [RZBUserInteraction timeout];
+    [self writeData:data characteristicUUID:characteristicUUID serviceUUID:serviceUUID timeout:timeout completion:completion];
+}
+
+- (void)writeData:(NSData *)data
+characteristicUUID:(CBUUID *)characteristicUUID
+      serviceUUID:(CBUUID *)serviceUUID
+          timeout:(NSTimeInterval)timeout
+       completion:(RZBCharacteristicBlock)completion
+{
     NSParameterAssert(data);
     NSParameterAssert(completion);
     RZBUUIDPath *path = RZBUUIDP(self.identifier, serviceUUID, characteristicUUID);
     RZBWriteCharacteristicCommand *cmd = [[RZBWriteWithReplyCharacteristicCommand alloc] initWithUUIDPath:path];
     cmd.data = data;
     [cmd addCallbackBlock:completion];
-    [self.dispatch dispatchCommand:cmd];
+    [self.dispatch dispatchCommand:cmd timeout:timeout];
 }
 
 - (void)discoverServiceUUIDs:(NSArray *)serviceUUIDs
