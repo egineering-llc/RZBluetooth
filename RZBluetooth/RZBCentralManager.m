@@ -97,8 +97,21 @@
                                options:(NSDictionary *)options
                 onDiscoveredPeripheral:(RZBScanBlock)scanBlock
 {
-    NSTimeInterval timeout = [RZBUserInteraction timeout];
-    [self scanForPeripheralsWithServices:serviceUUIDs options:options timeout:timeout onDiscoveredPeripheral:scanBlock];
+    NSParameterAssert(scanBlock);
+    self.activeScanBlock = scanBlock;
+    [self completeScanCommand];
+    RZBScanCommand *cmd = [self.dispatch commandOfClass:[RZBScanCommand class]
+                                       matchingUUIDPath:nil
+                                              createNew:YES];
+    cmd.serviceUUIDs = serviceUUIDs;
+    cmd.scanOptions = options;
+    [cmd addCallbackBlock:^(id object, NSError *error) {
+        if (error) {
+            scanBlock(nil, error);
+        }
+    }];
+
+    [self.dispatch dispatchCommand:cmd];
 }
 
 - (void)scanForPeripheralsWithServices:(NSArray *)serviceUUIDs

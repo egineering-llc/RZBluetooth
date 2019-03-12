@@ -191,8 +191,13 @@ characteristicUUID:(CBUUID *)characteristicUUID
       serviceUUID:(CBUUID *)serviceUUID
        completion:(RZBCharacteristicBlock)completion
 {
-    NSTimeInterval timeout = [RZBUserInteraction timeout];
-    [self writeData:data characteristicUUID:characteristicUUID serviceUUID:serviceUUID timeout:timeout completion:completion];
+    NSParameterAssert(data);
+    NSParameterAssert(completion);
+    RZBUUIDPath *path = RZBUUIDP(self.identifier, serviceUUID, characteristicUUID);
+    RZBWriteCharacteristicCommand *cmd = [[RZBWriteWithReplyCharacteristicCommand alloc] initWithUUIDPath:path];
+    cmd.data = data;
+    [cmd addCallbackBlock:completion];
+    [self.dispatch dispatchCommand:cmd];
 }
 
 - (void)writeData:(NSData *)data

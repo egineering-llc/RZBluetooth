@@ -39,8 +39,26 @@
 
 - (void)dispatchCommand:(RZBCommand *)command
 {
-    NSTimeInterval timeout = [RZBUserInteraction timeout];
-    [self dispatchCommand:command timeout:timeout];
+    NSParameterAssert(command);
+    @synchronized(self.commands) {
+        if (![self.commands containsObject:command]) {
+            [self.commands addObject:command];
+        }
+    }
+    if ([RZBUserInteraction enabled]) {
+        command.expiresAt = [[NSDate date] timeIntervalSinceReferenceDate] + [RZBUserInteraction timeout];
+        int64_t timeout = ([RZBUserInteraction timeout] * NSEC_PER_SEC);
+        __weak typeof(self) weakSelf = self;
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, timeout), self.queue, ^{
+            [weakSelf checkForExpiredCommands];
+        });
+    }
+
+    self.dispatchCounter += 1;
+    dispatch_async(self.queue, ^{
+        [self executeCommand:command];
+        self.dispatchCounter -= 1;
+    });
 }
 
 - (void)dispatchCommand:(RZBCommand *)command timeout:(NSTimeInterval)timeout
@@ -51,14 +69,13 @@
             [self.commands addObject:command];
         }
     }
-    if ([RZBUserInteraction enabled]) {
-        command.expiresAt = [[NSDate date] timeIntervalSinceReferenceDate] + timeout;
-        int64_t delta = (timeout * NSEC_PER_SEC);
-        __weak typeof(self) weakSelf = self;
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, delta), self.queue, ^{
-            [weakSelf checkForExpiredCommands];
-        });
-    }
+
+    command.expiresAt = [[NSDate date] timeIntervalSinceReferenceDate] + timeout;
+    int64_t delta = (timeout * NSEC_PER_SEC);
+    __weak typeof(self) weakSelf = self;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, delta), self.queue, ^{
+        [weakSelf checkForExpiredCommands];
+    });
 
     self.dispatchCounter += 1;
     dispatch_async(self.queue, ^{
