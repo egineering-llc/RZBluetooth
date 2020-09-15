@@ -3,3 +3,5 @@
 //
 
 #import "RZBSimulatedTestCase.h"
+#import "RZBluetooth.h"
+#import "RZMockBluetooth.h"

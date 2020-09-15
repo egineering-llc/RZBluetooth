@@ -7,10 +7,10 @@
 //
 
 #import "RZBTestDefines.h"
-#import "RZBluetooth/RZMockBluetooth.h"
+#import "RZMockBluetooth.h"
 #import "RZBSimulatedTestCase.h"
 #import "NSRunLoop+RZBWaitFor.h"
-#import "RZBluetooth/RZBCentralManager+Private.h"
+#import "RZBCentralManager+Private.h"
 
 @implementation RZBSimulatedTestCase
 

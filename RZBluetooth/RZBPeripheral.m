@@ -8,6 +8,7 @@
 
 #import "RZBPeripheral+Private.h"
 #import "RZBErrors.h"
+#import "RZBUserInteraction.h"
 
 @implementation RZBPeripheral
 

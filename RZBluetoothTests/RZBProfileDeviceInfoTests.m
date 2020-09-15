@@ -7,6 +7,7 @@
 //
 
 #import "RZBSimulatedTestCase.h"
+#import "RZBDeviceInfo.h"
 
 @interface RZBProfileDeviceInfoTests : RZBSimulatedTestCase
 @property (strong, nonatomic) RZBDeviceInfo *deviceInfo;
