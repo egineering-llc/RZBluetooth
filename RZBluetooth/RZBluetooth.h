@@ -2,21 +2,18 @@
 //  RZBluetooth.h
 //  RZBluetooth
 //
-//  Created by Brian King on 7/31/15.
-//  Copyright (c) 2015 Raizlabs. All rights reserved.
+//  Created by Joe Rossano on 10/15/20.
+//  Copyright © 2020 Raizlabs. All rights reserved.
 //
 
-@import CoreBluetooth;
+#import <Foundation/Foundation.h>
 
-#import "RZBCentralManager.h"
-#import "RZBPeripheral.h"
-#import "RZBScanInfo.h"
-#import "RZBErrors.h"
-#import "RZBUserInteraction.h"
-#import "RZBLog.h"
+//! Project version number for RZBluetooth.
+FOUNDATION_EXPORT double RZBluetoothVersionNumber;
 
-#import "CBUUID+RZBPublic.h"
-#import "RZBDeviceInfo.h"
-#import "RZBHeartRateMeasurement.h"
-#import "RZBPeripheral+RZBHeartRate.h"
-#import "RZBPeripheral+RZBBattery.h"
+//! Project version string for RZBluetooth.
+FOUNDATION_EXPORT const unsigned char RZBluetoothVersionString[];
+
+// In this header, you should import all the public headers of your framework using statements like #import <RZBluetooth/PublicHeader.h>
+
+
